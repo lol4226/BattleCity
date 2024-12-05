@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "Render/ShaderProgram.h";
+
 GLfloat point[] = {
      0.0f,  0.5f, 0.0f,
      0.5f, -0.5f, 0.0f,
@@ -21,7 +23,7 @@ const char* vertex_shader =
 "out vec3 color;"
 "void main() {"
 "    color = vertex_color;"
-"   gl_Position = vec4(vertex_position, 1.0);"
+"    gl_Position = vec4(vertex_position, 1.0);"
 "}";
 
 const char* fragment_shader =
@@ -90,6 +92,17 @@ int main(void)
 
     glClearColor(0, 1, 0, 1);
 
+    std::string vertexShader(vertex_shader);
+    std::string fragmentShader(fragment_shader);
+    Render::ShaderProgram shaderProgram(vertexShader, fragmentShader);
+
+
+    if (!shaderProgram.isCompiled())
+    {
+        std::cerr << "Cant create shader program" << std::endl;
+        return -1;
+    }
+
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertex_shader, nullptr);
     glCompileShader(vs);
@@ -137,7 +150,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shader_program);
+        shaderProgram.use();
         glBindVertexArray(vao);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
